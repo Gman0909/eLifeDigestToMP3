@@ -87,7 +87,7 @@ def openelifexml(articlenumber):
             makesound(substring,articlenumber,chunk)
             chunk +=1
         concatenate(articlenumber)
-    os.system('rm *.xml')
+    os.system('rm '+filename)
 
 def scanfeed():
     articlenumber = '00000'
