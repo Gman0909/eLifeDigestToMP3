@@ -8,13 +8,11 @@ from glob import iglob
 import shutil
 import time
 from optparse import OptionParser
-from slacker import Slacker
 
 global soup
 input_articles = None
 args = None
 cli = None
-slack = Slacker('')
 
 class newdigest(object):
 	def  __init__(self, title,content):
