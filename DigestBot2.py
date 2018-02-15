@@ -40,11 +40,11 @@ def makesound(speaktext,articlenumber,chunk):
     #tts = gTTS(text=speaktext, lang='en')
     #tts.save("digest.mp3")
     #print 'creating mp3 for article '+str(articlenumber+'-'+str(chunk)+'.mp3')
-    os.system('aws polly synthesize-speech --output-format mp3 --voice-id Joanna --text \''+speaktext+'\' '+str(articlenumber+'-'+str(chunk)+'.mpt | echo '''))
+    os.system('aws polly synthesize-speech --output-format mp3 --voice-id Joanna --text \''+speaktext+'\' '+str(articlenumber+'-'+str(chunk)+'.mpt'))
 
 def concatenate(articlenumber):
     print 'creating mp3 for article '+str(articlenumber)+'\n'
-    destination = open(str(articlenumber)+'-final.mp3', 'wb')
+    destination = open(str(articlenumber)+'.mp3', 'wb')
     for filename in iglob(os.path.join('*.mpt')):
         shutil.copyfileobj(open(filename, 'rb'), destination)
     destination.close()
@@ -67,13 +67,14 @@ def openelifexml(articlenumber):
     while testurl('https://cdn.elifesciences.org/articles/'+articlenumber+'/elife-'+articlenumber+'-v'+str(version)+'.xml'):
         version += 1
     xmlurl = 'https://cdn.elifesciences.org/articles/'+articlenumber+'/elife-'+articlenumber+'-v'+str(version-1)+'.xml'
-    tempfile = urllib.urlretrieve(xmlurl, 'temp.xml')
-    soup = parser.parse_document('temp.xml')
+    filename = str(articlenumber)+'.xml'
+    tempfile = urllib.urlretrieve(xmlurl, filename)
+    soup = parser.parse_document(filename)
 
     currentdigest = hasdigest(soup)
     if currentdigest:
-        title = currentdigest.title.encode('utf-8','ignore')
-        content = currentdigest.content.encode('utf-8','ignore')
+        title = currentdigest.title.encode('ascii','ignore')
+        content = currentdigest.content.encode('ascii','ignore')
 
 #output the title and content. this is the bit where you hook up another output (slack, alexa etc)
 
@@ -86,6 +87,7 @@ def openelifexml(articlenumber):
             makesound(substring,articlenumber,chunk)
             chunk +=1
         concatenate(articlenumber)
+    os.system('rm *.xml')
 
 def scanfeed():
     articlenumber = '00000'
