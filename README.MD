@@ -1,4 +1,4 @@
-##eLifeArticleToMP3##
+**eLifeArticleToMP3**
 
 This script utilises the AWS Polly service to generate MP3's from the text of eLife digests.
 It assumes you have AWS CLI installed (see https://aws.amazon.com/cli/)
