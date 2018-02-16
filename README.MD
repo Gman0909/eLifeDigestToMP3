@@ -4,7 +4,7 @@ This script utilises the AWS Polly service to generate MP3's from the text of eL
 It assumes you have AWS CLI installed (see https://aws.amazon.com/cli/)
 
 - Run server.py
-- Run DigestBot2.py
+- Run DigestBot3.py
 
 Running with no command line arguments will scan the eLife RSS feed for articles
 containing Digests.
