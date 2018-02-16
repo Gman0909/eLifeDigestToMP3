@@ -21,6 +21,12 @@ class newdigest(object):
 
 #checks if a digest is present given an elifeTools soup
 
+
+def changepath(path):
+	if not os.path.isdir(path):
+		os.makedirs(path)
+	os.chdir(path)
+
 def hasdigest(item):
     if parser.digest(item):
         title = parser.title(item)
@@ -113,6 +119,7 @@ def get_input_parameters():
     input_articles = raw_input("Enter article numbers to convert (separated by a comma) or 'r' to scan RSS feed:")
     args = input_articles.split(',')
 
+changepath('Digests')
 args = sys.argv
 print 'eLife Digest to MP3 converter'
 print 'This work is licensed under a Creative Commons Attribution 4.0 International License'
