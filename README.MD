@@ -11,4 +11,6 @@ containing Digests.
 
 You can also enter a series of eLife article numbers as command line parameters (no spaces)
 
+_Example: python Digestbot3.py 32481_
+
 Any digests found will be converted to MP3 and saved locally.
