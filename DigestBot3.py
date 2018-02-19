@@ -19,13 +19,14 @@ class NewDigest(object):
         self.content = content
 
 
-# checks if a digest is present given an elifeTools soup
-
-
 def changepath(path):
     if not os.path.isdir(path):
         os.makedirs(path)
     os.chdir(path)
+
+
+# checks if a digest is present in a given elifeTools soup
+
 
 
 def hasdigest(item):
@@ -112,8 +113,8 @@ def openelifexml(articlenumber):
 
         # output the title and content. this is the bit where you hook up another output (slack, alexa etc)
 
-        print 'Digest for article number ' + articlenumber + ' v' + str(version - 1) + ', ' + title + ':'
-        print content
+        print 'Found Digest for article number ' + articlenumber + ' v' + str(version - 1) + ', ' + title
+        # print content
         content = title + '.\n' + content
         choppedcontent = chunkstring(content, 1500)
         chunk = 1
