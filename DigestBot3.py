@@ -51,11 +51,10 @@ def makesound(speaktext, articlenumber, chunk):
     speaktext = speaktext.replace("'", "")
     filename = str(articlenumber + '-' + str(chunk) + '.mpt')
 
-
     response = client.synthesize_speech(
         OutputFormat='mp3',
         SampleRate='22050',
-        Text= speaktext,
+        Text=speaktext,
         TextType='text',
         VoiceId='Joanna',
     )
@@ -63,12 +62,11 @@ def makesound(speaktext, articlenumber, chunk):
     f = file(filename, 'w')
     stream = response['AudioStream']
     while True:
-        snippet =stream.read(1024)
+        snippet = stream.read(1024)
         if len(snippet) != 0:
             f.write(snippet)
         else:
             break
-
 
 
 # concatenate all the mpt's we have just created into a final .mp3
@@ -150,6 +148,7 @@ changepath('Digests')
 print 'eLife Digest to MP3 converter'
 print 'This work is licensed under a Creative Commons Attribution 4.0 International License'
 print 'Usage: enter eLife article numbers after the command (without commas), or leave blank for an RSS scan\n'
+
 if len(args) == 1:
     scanfeed()
 else:
