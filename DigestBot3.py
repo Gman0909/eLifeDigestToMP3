@@ -8,14 +8,12 @@ from glob import iglob
 import shutil
 import boto3
 
-global soup
-input_articles = None
 args = sys.argv
 cli = None
 client = boto3.client('polly')
 
 
-class newdigest(object):
+class NewDigest(object):
     def __init__(self, title, content):
         self.title = title
         self.content = content
@@ -34,7 +32,7 @@ def hasdigest(item):
     if parser.digest(item):
         title = parser.title(item)
         content = parser.digest(item)
-        return newdigest(title, content)
+        return NewDigest(title, content)
     else:
         return False
 
@@ -59,7 +57,7 @@ def makesound(speaktext, articlenumber, chunk):
         VoiceId='Joanna',
     )
 
-# Write the audio stream from the response to file until it's done
+    # Write the audio stream from the response to file until it's done
 
     f = file(filename, 'w')
     stream = response['AudioStream']
@@ -93,10 +91,10 @@ def testurl(url):
         return False
 
 
-# openelifexml downloads the xml of the latest version of an article to a temp file and looks for a digest. if it finds one, it calls makesound() to conver it to an mp3
+# openelifexml downloads the xml of the latest version of an article to a temp file and looks for a digest.
+# if it finds one, it calls makesound() to conver it to an mp3
 
 def openelifexml(articlenumber):
-    # type: (object) -> object
     print 'Scanning article for digest: ' + str(articlenumber) + '\r'
     version = 1
     while testurl('https://cdn.elifesciences.org/articles/' + articlenumber + '/elife-' + articlenumber + '-v' + str(
@@ -105,7 +103,7 @@ def openelifexml(articlenumber):
     xmlurl = 'https://cdn.elifesciences.org/articles/' + articlenumber + '/elife-' + articlenumber + '-v' + str(
         version - 1) + '.xml'
     filename = str(articlenumber) + '.xml'
-    tempfile = urllib.urlretrieve(xmlurl, filename)
+    urllib.urlretrieve(xmlurl, filename)
     soup = parser.parse_document(filename)
     currentdigest = hasdigest(soup)
     if currentdigest:
@@ -127,7 +125,6 @@ def openelifexml(articlenumber):
 
 
 def scanfeed():
-    articlenumber = '00000'
     feed = feedparser.parse('https://elifesciences.org/rss/recent.xml')
     print 'Scanning %s articles in the eLife RSS feed' % (len(feed['entries']))
 
