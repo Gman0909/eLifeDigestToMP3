@@ -59,6 +59,8 @@ def makesound(speaktext, articlenumber, chunk):
         VoiceId='Joanna',
     )
 
+# Write the audio stream from the response to file until it's done
+
     f = file(filename, 'w')
     stream = response['AudioStream']
     while True:
@@ -67,6 +69,7 @@ def makesound(speaktext, articlenumber, chunk):
             f.write(snippet)
         else:
             break
+    f.close()
 
 
 # concatenate all the mpt's we have just created into a final .mp3
