@@ -1,12 +1,17 @@
 from elifetools import parseJATS as parser
 import feedparser
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import requests
 import os
 import sys
 from glob import iglob
 import shutil
 import boto3
+import ssl
+
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 args = sys.argv
 cli = None
@@ -28,7 +33,6 @@ def changepath(path):
 # checks if a digest is present in a given elifeTools soup
 
 
-
 def hasdigest(item):
     if parser.digest(item):
         title = parser.title(item)
@@ -47,7 +51,7 @@ def chunkstring(string, length):
 # Call this to save some text as a a temporary mp3 file with an .mpt extension
 
 def makesound(speaktext, articlenumber, chunk):
-    speaktext = speaktext.replace("'", "")
+    # speaktext = speaktext.replace("'", "")
     filename = str(articlenumber + '-' + str(chunk) + '.mpt')
 
     response = client.synthesize_speech(
@@ -60,7 +64,7 @@ def makesound(speaktext, articlenumber, chunk):
 
     # Write the audio stream from the response to file until it's done
 
-    f = file(filename, 'w')
+    f = open(filename, 'wb')
     stream = response['AudioStream']
     while True:
         snippet = stream.read(1024)
@@ -74,7 +78,7 @@ def makesound(speaktext, articlenumber, chunk):
 # concatenate all the mpt's we have just created into a final .mp3
 
 def concatenate(articlenumber):
-    print 'creating mp3 for article ' + str(articlenumber) + '\n'
+    print('creating mp3 for article ' + str(articlenumber) + '\n')
     destination = open(str(articlenumber) + '.mp3', 'wb')
     for filename in sorted(iglob('*.mpt')):
         shutil.copyfileobj(open(filename, 'rb'), destination)
@@ -92,11 +96,17 @@ def testurl(url):
         return False
 
 
+def geturl(url, filename):
+    with urllib.request.urlopen(url, context=ctx) as u, \
+            open(filename, 'wb') as f:
+        f.write(u.read())
+
+
 # openelifexml downloads the xml of the latest version of an article to a temp file and looks for a digest.
 # if it finds one, it calls makesound() to conver it to an mp3
 
 def openelifexml(articlenumber):
-    print 'Scanning article for digest: ' + str(articlenumber) + '\r'
+    print('Scanning article for digest: ' + str(articlenumber) + '\r')
     version = 1
     while testurl('https://cdn.elifesciences.org/articles/' + articlenumber + '/elife-' + articlenumber + '-v' + str(
             version) + '.xml'):
@@ -104,17 +114,19 @@ def openelifexml(articlenumber):
     xmlurl = 'https://cdn.elifesciences.org/articles/' + articlenumber + '/elife-' + articlenumber + '-v' + str(
         version - 1) + '.xml'
     filename = str(articlenumber) + '.xml'
-    urllib.urlretrieve(xmlurl, filename)
+
+    geturl(xmlurl, filename)
     soup = parser.parse_document(filename)
+
     currentdigest = hasdigest(soup)
     if currentdigest:
-        title = currentdigest.title.encode('ascii', 'ignore')
-        content = currentdigest.content.encode('ascii', 'ignore')
+        title = currentdigest.title
+        content = currentdigest.content
 
         # output the title and content. this is the bit where you hook up another output (slack, alexa etc)
 
-        print 'Found Digest for article number ' + articlenumber + ' v' + str(version - 1) + ', ' + title
-        # print content
+        print('Found Digest for article number {} v{} : {}'.format(articlenumber, version - 1, title))
+        # print (content)
         content = title + '.\n' + content
         choppedcontent = chunkstring(content, 1500)
         chunk = 1
@@ -126,8 +138,10 @@ def openelifexml(articlenumber):
 
 
 def scanfeed():
-    feed = feedparser.parse('https://elifesciences.org/rss/recent.xml')
-    print 'Scanning %s articles in the eLife RSS feed' % (len(feed['entries']))
+    feed = []
+    with urllib.request.urlopen('https://elifesciences.org/rss/recent.xml', context=ctx) as url:
+        feed = feedparser.parse(url)
+    print('Scanning {} articles in the eLife RSS feed'.format(len(feed['entries'])))
 
     # scan every item in the feed by extracting the article number
 
@@ -138,17 +152,18 @@ def scanfeed():
 
 
 # prompt the user to enter a list of article numbers
+
 def get_input_parameters():
     global input_articles
     global args
-    input_articles = raw_input("Enter article numbers to convert (separated by a comma) or 'r' to scan RSS feed:")
+    input_articles = input("Enter article numbers to convert (separated by a comma) or 'r' to scan RSS feed:")
     args = input_articles.split(',')
 
 
 changepath('Digests')
-print 'eLife Digest to MP3 converter'
-print 'This work is licensed under a Creative Commons Attribution 4.0 International License'
-print 'Usage: enter eLife article numbers after the command (without commas), or leave blank for an RSS scan\n'
+print('eLife Digest to MP3 converter')
+print('This work is licensed under a Creative Commons Attribution 4.0 International License')
+print('Usage: enter eLife article numbers after the command (without commas), or leave blank for an RSS scan\n')
 
 if len(args) == 1:
     scanfeed()
