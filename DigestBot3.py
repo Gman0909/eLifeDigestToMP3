@@ -103,6 +103,8 @@ def geturl(url, filename):
 
 def openelifexml(articlenumber):
     print('Scanning article for digest: ' + str(articlenumber) + '\r')
+
+    # find the latest version of the article by testing subsequent version URLs
     version = 1
     while testurl('https://cdn.elifesciences.org/articles/' + articlenumber + '/elife-' + articlenumber + '-v' + str(
             version) + '.xml'):
@@ -111,8 +113,12 @@ def openelifexml(articlenumber):
         version - 1) + '.xml'
     filename = str(articlenumber) + '.xml'
 
+    # Grab the article XML from the latest version's URL and dump it to a file we can then examine
+
     geturl(xmlurl, filename)
     soup = parser.parse_document(filename)
+
+    # Is there a digest in the XML? If so, get converting.
 
     currentdigest = hasdigest(soup)
     if currentdigest:
@@ -124,6 +130,8 @@ def openelifexml(articlenumber):
         print('Found Digest for article number {} v{} : {}'.format(articlenumber, version - 1, title))
         # print (content)
         content = title + '.\n' + content
+
+        # Amazon's Polly has a 1500char limit per request. chunkstring() takes care of that.
         choppedcontent = chunkstring(content, 1500)
         chunk = 1
         for substring in choppedcontent:
@@ -132,7 +140,8 @@ def openelifexml(articlenumber):
         concatenate(articlenumber)
     os.system('rm ' + filename)
 
-# Scan the eLife RSS feed for digests to convert. Default behavioir if the script is run with no arguments
+
+# Scan the eLife RSS feed for digests to convert. Default behaviour if the script is run with no arguments
 
 def scanfeed():
     feed = []
