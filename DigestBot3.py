@@ -6,6 +6,7 @@ import shutil
 import ssl
 import requests
 import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 from elifetools import parseJATS as parser
 import feedparser
 
@@ -50,28 +51,29 @@ def chunkstring(string, length):
 # Call this to save some text as a a temporary mp3 file with an .mpt extension
 
 def makesound(speaktext, articlenumber, chunk):
-    # speaktext = speaktext.replace("'", "")
     filename = str(articlenumber + '-' + str(chunk) + '.mpt')
+    try:
+        response = CLIENT.synthesize_speech(
+            OutputFormat='mp3',
+            SampleRate='22050',
+            Text=speaktext,
+            TextType='text',
+            VoiceId='Joanna',
+        )
 
-    response = CLIENT.synthesize_speech(
-        OutputFormat='mp3',
-        SampleRate='22050',
-        Text=speaktext,
-        TextType='text',
-        VoiceId='Joanna',
-    )
+        # Write the audio stream from the response to file until it's done
 
-    # Write the audio stream from the response to file until it's done
-
-    f = open(filename, 'wb')
-    stream = response['AudioStream']
-    while True:
-        snippet = stream.read(1024)
-        if len(snippet) != 0:
-            f.write(snippet)
-        else:
-            break
-    f.close()
+        f = open(filename, 'wb')
+        stream = response['AudioStream']
+        while True:
+            snippet = stream.read(1024)
+            if len(snippet) != 0:
+                f.write(snippet)
+            else:
+                break
+        f.close()
+    except (BotoCoreError, ClientError) as err:
+            print(str(err))
 
 
 # concatenate all the mpt's we have just created into a final .mp3
