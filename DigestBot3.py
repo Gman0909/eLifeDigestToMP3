@@ -132,6 +132,7 @@ def openelifexml(articlenumber):
         concatenate(articlenumber)
     os.system('rm ' + filename)
 
+# Scan the eLife RSS feed for digests to convert. Default behavioir if the script is run with no arguments
 
 def scanfeed():
     feed = []
