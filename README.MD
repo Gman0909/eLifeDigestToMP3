@@ -1,7 +1,7 @@
 ## You can now listen to eLife Digests
 
 This script utilises the AWS Polly service to generate MP3's from the text of eLife digests.
-It assumes you have AWS CLI installed (see https://aws.amazon.com/cli/)
+It assumes you have AWS CLI installed (see https://aws.amazon.com/cli/) with the proper credentials.
 
   `$ python3 server.py`
   
