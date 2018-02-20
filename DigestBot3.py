@@ -1,21 +1,20 @@
-from elifetools import parseJATS as parser
-import feedparser
 import urllib.request, urllib.parse, urllib.error
-import requests
 import os
 import sys
 from glob import iglob
 import shutil
-import boto3
 import ssl
+import requests
+import boto3
+from elifetools import parseJATS as parser
+import feedparser
 
-ctx = ssl.create_default_context()
-ctx.check_hostname = False
-ctx.verify_mode = ssl.CERT_NONE
+CTX = ssl.create_default_context()
+CTX.check_hostname = False
+CTX.verify_mode = ssl.CERT_NONE
 
-args = sys.argv
-cli = None
-client = boto3.client('polly')
+ARGS = sys.argv
+CLIENT = boto3.client('polly')
 
 
 class NewDigest(object):
@@ -54,7 +53,7 @@ def makesound(speaktext, articlenumber, chunk):
     # speaktext = speaktext.replace("'", "")
     filename = str(articlenumber + '-' + str(chunk) + '.mpt')
 
-    response = client.synthesize_speech(
+    response = CLIENT.synthesize_speech(
         OutputFormat='mp3',
         SampleRate='22050',
         Text=speaktext,
@@ -90,14 +89,11 @@ def concatenate(articlenumber):
 
 def testurl(url):
     request = requests.get(url)
-    if request.status_code == 200:
-        return True
-    else:
-        return False
+    return bool(request.status_code == 200)
 
 
 def geturl(url, filename):
-    with urllib.request.urlopen(url, context=ctx) as u, \
+    with urllib.request.urlopen(url, context=CTX) as u, \
             open(filename, 'wb') as f:
         f.write(u.read())
 
@@ -139,7 +135,7 @@ def openelifexml(articlenumber):
 
 def scanfeed():
     feed = []
-    with urllib.request.urlopen('https://elifesciences.org/rss/recent.xml', context=ctx) as url:
+    with urllib.request.urlopen('https://elifesciences.org/rss/recent.xml', context=CTX) as url:
         feed = feedparser.parse(url)
     print('Scanning {} articles in the eLife RSS feed'.format(len(feed['entries'])))
 
@@ -151,22 +147,13 @@ def scanfeed():
         openelifexml(articlenumber)
 
 
-# prompt the user to enter a list of article numbers
-
-def get_input_parameters():
-    global input_articles
-    global args
-    input_articles = input("Enter article numbers to convert (separated by a comma) or 'r' to scan RSS feed:")
-    args = input_articles.split(',')
-
-
 changepath('Digests')
 print('eLife Digest to MP3 converter')
 print('This work is licensed under a Creative Commons Attribution 4.0 International License')
 print('Usage: enter eLife article numbers after the command (without commas), or leave blank for an RSS scan\n')
 
-if len(args) == 1:
+if len(ARGS) == 1:
     scanfeed()
 else:
-    for arg in args[1:]:
+    for arg in ARGS[1:]:
         openelifexml(arg)
