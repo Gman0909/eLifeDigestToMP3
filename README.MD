@@ -2,7 +2,7 @@
 
 The Open Access online science journal elifesciences.org has a nice collection of Digests, plain-english summaries for many of its more interesting articles. This script utilises the AWS Polly service to generate MP3's from the text of eLife Digests, so you can listen to them instead as bite-sized audio nuggets of science. You can find some output samples in the [Digests](https://github.com/gmaciocci/eLifeDigestToMP3/tree/master/Digests) folder. 
 
-The script assumes you have AWS CLI installed (see https://aws.amazon.com/cli/) with the proper credentials.
+The script assumes you have AWS CLI installed (see https://aws.amazon.com/cli/) with the proper credentials, though you could easily swap that out for your preferred Text-to-Speech method.
 
   `$ python3 server.py`
   
